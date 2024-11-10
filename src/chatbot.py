@@ -1,7 +1,7 @@
 # chatbot.py
 
 from abc import ABC, abstractmethod
-
+import os
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder  # 导入提示模板相关类
 from langchain_core.messages import HumanMessage  # 导入消息类
@@ -18,6 +18,10 @@ class ChatBot(ABC):
     def __init__(self, prompt_file="./prompts/chatbot.txt", session_id=None):
         self.prompt_file = prompt_file
         self.session_id = session_id if session_id else "default_session_id"
+         # 设置 OpenAI API 配置
+        os.environ["OPENAI_API_BASE"] = "https://api.javis3000.com/v1"
+        if not os.getenv("OPENAI_API_KEY"):
+            raise ValueError("请设置 OPENAI_API_KEY 环境变量")
         self.prompt = self.load_prompt()
         # LOG.debug(f"[ChatBot Prompt]{self.prompt}")
         self.create_chatbot()

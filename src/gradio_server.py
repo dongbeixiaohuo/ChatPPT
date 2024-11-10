@@ -2,6 +2,7 @@ import gradio as gr
 import os
 
 from gradio.data_classes import FileData
+#from gradio.types import FileData
 
 from config import Config
 from chatbot import ChatBot
@@ -185,7 +186,9 @@ with gr.Blocks(
 if __name__ == "__main__":
     # 启动Gradio应用，允许队列功能，并通过 HTTPS 访问
     demo.queue().launch(
-        share=False,
+        share=True,
+        server_port=7860,
         server_name="0.0.0.0",
-        # auth=("django", "qaz!@#$") # ⚠️注意：记住修改密码
+        auth=("user", "Linemore"),
+        debug=True
     )
