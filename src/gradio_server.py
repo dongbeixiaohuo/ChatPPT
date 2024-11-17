@@ -39,10 +39,10 @@ layout_manager = LayoutManager(get_layout_mapping(ppt_template))
 # 定义生成幻灯片内容的函数
 def generate_contents(message, history):
     try:
-        # 初始化一个列表，用于收集用户输入的文本和音频转录
+        # 初始化文本列表
         texts = []
 
-        # 获取文本输入，如果存在则添加到列表
+        # 获取文本输入
         text_input = message.get("text")
         if text_input:
             texts.append(text_input)
@@ -72,19 +72,21 @@ def generate_contents(message, history):
             else:
                 LOG.debug(f"[格式不支持]: {uploaded_file}")
 
-        # 将所有文本和转录结果合并为一个字符串，作为用户需求
+        # 合并用户需求
         user_requirement = "需求如下:\n" + "\n".join(texts)
-        LOG.info(user_requirement)
+        LOG.info(f"[用户需求] {user_requirement}")
 
-        # 与聊天机器人进行对话，生成幻灯片内容
-        slides_content = chatbot.chat_with_history(user_requirement)
+        # 获取 chatbot 响应
+        response = chatbot.chat_with_history(user_requirement)
+        LOG.info(f"[ChatBot 原始响应] 类型: {type(response)}, 内容: {response}")
+        
+        # 直接返回 chatbot 的响应，因为它已经是正确的格式了
+        return response
 
-        return slides_content
     except Exception as e:
         LOG.error(f"[内容生成错误]: {e}")
-        # 抛出 Gradio 错误，以便在界面上显示友好的错误信息
+        LOG.error(f"[错误类型] {type(e)}")
         raise gr.Error(f"网络问题，请重试:)")
-        
 
 def handle_image_generate(history):
     try:
@@ -140,14 +142,14 @@ with gr.Blocks(
     gr.Markdown("## ChatPPT")
 
     # 定义语音（mic）转文本的接口
-    # gr.Interface(
-    #     fn=transcribe,  # 执行转录的函数
-    #     inputs=[
-    #         gr.Audio(sources="microphone", type="filepath"),  # 使用麦克风录制的音频输入
-    #     ],
-    #     outputs="text",  # 输出为文本
-    #     flagging_mode="never",  # 禁用标记功能
-    # )
+    gr.Interface(
+        fn=transcribe,  # 执行转录的函数
+        inputs=[
+            gr.Audio(sources="microphone", type="filepath"),  # 使用麦克风录制的音频输入
+        ],
+        outputs="text",  # 输出为文本
+        flagging_mode="never",  # 禁用标记功能
+    )
 
     # 创建聊天机器人界面，提示用户输入
     contents_chatbot = gr.Chatbot(
@@ -187,7 +189,7 @@ if __name__ == "__main__":
     # 启动Gradio应用，允许队列功能，并通过 HTTPS 访问
     demo.queue().launch(
         share=True,
-        server_port=7860,
+        server_port=17860,
         server_name="0.0.0.0",
         auth=("user", "Linemore"),
         debug=True
